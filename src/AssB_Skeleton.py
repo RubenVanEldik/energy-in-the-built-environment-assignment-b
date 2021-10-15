@@ -17,6 +17,11 @@ Import your input data for the model
 
 
     # dynamic electricity prices vector
+    
+winter_input = pd.read_csv('../input/AssB_Input_Group12_winter.csv')
+
+summer_input = pd.read_csv('../input/AssB_Input_Group12_summer.csv')
+    
     #household's 15-min PV generation vector
     #household's 15-min demand vector
 

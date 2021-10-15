@@ -10,18 +10,16 @@ import pandas as pd  # for csv reading
 import matplotlib.pyplot as plt  # for plotting
 
 
-season = 'summer'
-
-
 """
 Import your input data for the model
 """
+group = 12
+season = 'summer'
 
+filename = f'../input/AssB_Input_Group{group}_{season}.csv'
 input_file = pd.read_csv(
-    f'../input/AssB_Input_Group12_{season}.csv', parse_dates=True, index_col='Start date/time')
-
+    filename, index_col='Start date/time', parse_dates=True)
 input_file.columns = ['end', 'demand', 'pv_gen', 'price', 'emission_factor']
-
 input_file.index.names = ['start']
 
 

@@ -11,31 +11,21 @@ import pandas as pd #for csv reading
 import numpy as np 
 import matplotlib.pyplot as plt #for plotting
 
+
+
+
+season = 'summer'
+
+
 """
 Import your input data for the model
 """
 
-winter_input = pd.read_csv('../input/AssB_Input_Group12_winter.csv', index_col='Start date/time')
+input_file = pd.read_csv(f'../input/AssB_Input_Group12_{season}.csv', parse_dates=True, index_col='Start date/time')
 
-summer_input = pd.read_csv('../input/AssB_Input_Group12_summer.csv', index_col='Start date/time')
+input_file.columns = ['end', 'demand', 'pv_gen', 'price', 'emission_factor']
 
-    # dynamic electricity prices vector
-    
-electricity_prices_winter = pd.read_csv('../input/AssB_Input_Group12_winter.csv', usecols = ['Electricity price [€/MWh]'])
-
-electricity_prices_summer = pd.read_csv('../input/AssB_Input_Group12_summer.csv', usecols = ['Electricity price [€/MWh]'])
-    
-    #household's 15-min PV generation vector
-
-pv_generation_winter = pd.read_csv('../input/AssB_Input_Group12_winter.csv', usecols = ['PV generation [kW]'])
-
-pv_generation_summer = pd.read_csv('../input/AssB_Input_Group12_summer.csv', usecols = ['PV generation [kW]'])
-
-    #household's 15-min demand vector
-
-household_demand_winter = pd.read_csv('../input/AssB_Input_Group12_winter.csv', usecols = ['Residential load [kW]'])
-
-household_demand_summer = pd.read_csv('../input/AssB_Input_Group12_summer.csv', usecols = ['Residential load [kW]'])
+input_file.index.names = ['start']
 
 
 
@@ -55,8 +45,8 @@ SoC_max = 1 #[-] (battery max state of charge)
 SoC0 = 0.5 #[-] (initial battery state of charge at the beginning of the day)
 
 C_bat = 13.5 #battery capacity parameter for a Tesla Powerwall rated at 13,5 [kWh]
-eff_dis = 0.94 #battery discharging efficeicny
-eff_ch = 0.94 #battery charging efficeicny
+eff_dis = 0.94 #battery discharging efficiency
+eff_ch = 0.94 #battery charging efficiency
 
 ######## Plot power demand and PV generation data
 f1 = plt.figure(1)
@@ -69,14 +59,20 @@ f1 = plt.figure(1)
 Step 1: Create a model
 """
 
+model = gp.Model('Optimising scambot 2000')
 
 """
 Step 2: Define variables
 """
 ######## Define your decision variables for the time horizon using addVars
- 
-    
-    
+
+
+grid_power = model.addVars(input_file.index, name="grid_power")
+
+battery_charge = model.addVars(input_file.index, name="battery_charge", lb=SoC_min * C_bat, ub=SoC_max * C_bat)
+
+battery_power = model.addVars(input_file.index, name="battery_power")
+
  
 """
 Step 3: Add constraints

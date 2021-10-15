@@ -15,15 +15,29 @@ import matplotlib.pyplot as plt #for plotting
 Import your input data for the model
 """
 
+winter_input = pd.read_csv('../input/AssB_Input_Group12_winter.csv', index_col='Start date/time')
+
+summer_input = pd.read_csv('../input/AssB_Input_Group12_summer.csv', index_col='Start date/time')
 
     # dynamic electricity prices vector
     
-winter_input = pd.read_csv('../input/AssB_Input_Group12_winter.csv')
+electricity_prices_winter = pd.read_csv('../input/AssB_Input_Group12_winter.csv', usecols = ['Electricity price [€/MWh]'])
 
-summer_input = pd.read_csv('../input/AssB_Input_Group12_summer.csv')
+electricity_prices_summer = pd.read_csv('../input/AssB_Input_Group12_summer.csv', usecols = ['Electricity price [€/MWh]'])
     
     #household's 15-min PV generation vector
+
+pv_generation_winter = pd.read_csv('../input/AssB_Input_Group12_winter.csv', usecols = ['PV generation [kW]'])
+
+pv_generation_summer = pd.read_csv('../input/AssB_Input_Group12_summer.csv', usecols = ['PV generation [kW]'])
+
     #household's 15-min demand vector
+
+household_demand_winter = pd.read_csv('../input/AssB_Input_Group12_winter.csv', usecols = ['Residential load [kW]'])
+
+household_demand_summer = pd.read_csv('../input/AssB_Input_Group12_summer.csv', usecols = ['Residential load [kW]'])
+
+
 
 """
 Parameters value

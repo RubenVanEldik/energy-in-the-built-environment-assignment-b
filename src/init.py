@@ -59,13 +59,15 @@ Step 2: Define variables
 # Define your decision variables for the time horizon using addVars
 
 
-grid_power = model.addVars(input_file.index, name="grid_power")
+grid_power = model.addVars(
+    input_file.index, name="grid_power", lb=-Pgridmax, ub=Pgridmax)
 
 # including SoC constraints
 battery_charge = model.addVars(
     input_file.index, name="battery_charge", lb=SoC_min * C_bat, ub=SoC_max * C_bat)
 
-battery_power = model.addVars(input_file.index, name="battery_power")
+battery_power = model.addVars(
+    input_file.index, name="battery_power", lb=-Pbatmax, ub=Pbatmax)
 
 
 """
@@ -74,11 +76,8 @@ Step 3: Add constraints
 # Nonnegative variables
 
 # Power boundaries
-model.addConstrs((grid_power[t]) <= Pgridmax for t in input_file.index)
-model.addConstrs(gp.abs_(battery_power[t]) <= Pbatmax for t in range(T))
-
 # Power balance formula
-model.addConstrs(grid_power[t] == input_file.demand[t] - input_file.pv_gen[t] 
+model.addConstrs(grid_power[t] == input_file.demand[t] - input_file.pv_gen[t]
                  - battery_power[t] for t in range(T))
 
 # Battery SoC dynamics constraint

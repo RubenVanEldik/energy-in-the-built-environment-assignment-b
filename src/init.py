@@ -52,32 +52,20 @@ Step 1: Create a model
 
 model = gp.Model('Optimising scambot 2000')
 
+
 """
 Step 2: Define variables
 """
-# Define your decision variables for the time horizon using addVars
-
-
-grid_power = model.addVars(
-    data.index, name="grid_power", lb=-Pgridmax, ub=Pgridmax)
-
-# including SoC constraints
+grid_power = model.addVars(data.index, lb=-Pgridmax, ub=Pgridmax)
 battery_charge = model.addVars(
-    data.index, name="battery_charge", lb=SoC_min * C_bat, ub=SoC_max *
-    C_bat)
+    data.index, lb=SoC_min * C_bat, ub=SoC_max * C_bat)
+battery_power_in = model.addVars(data.index, ub=Pbatmax)
+battery_power_out = model.addVars(data.index, ub=Pbatmax)
 
-battery_is_charging = model.addVars(
-    data.index, name='battery_is_charging', vtype=gp.GRB.BINARY)
-battery_power_in = model.addVars(
-    data.index, name="battery_power_in", ub=Pbatmax)
-battery_power_out = model.addVars(
-    data.index, name="battery_power_out", ub=Pbatmax)
 
 """
 Step 3: Add constraints
 """
-# Nonnegative variables
-
 # Power boundaries
 # Power balance formula
 model.addConstrs(grid_power[t] == data.demand[t]
@@ -85,22 +73,20 @@ model.addConstrs(grid_power[t] == data.demand[t]
                  + battery_power_in[t] for t in range(T))
 
 # Battery SoC dynamics constraint
-model.addConstrs(battery_power_in[t] == (battery_is_charging[t] *
-                 ((battery_charge[t]-battery_charge[t-1]) /
-                 (Delta_t*eff_ch))) for t in range(1, T))
-model.addConstrs(battery_power_out[t] == ((1 - battery_is_charging[t]) *
-                 (((battery_charge[t-1]-battery_charge[t])*eff_dis) /
-                 (Delta_t))) for t in range(1, T))
+model.addConstrs(battery_charge[t] == battery_charge[t - 1] + (battery_power_in[t] *
+                 Delta_t * eff_ch) - (battery_power_out[t] * Delta_t) / eff_dis for t in range(1, T))
 
 model.addConstr(battery_power_in[0] == (
     battery_charge[0]-SoC0*C_bat)/(Delta_t*eff_ch))
 model.addConstr(battery_power_out[0] == (
     (SoC0*C_bat-battery_charge[0])*eff_dis)/Delta_t)
 
+
 """
 Step 4: Set objective function
 """
 obj = gp.quicksum(data.price[t]*grid_power[t]*Delta_t for t in range(T))
+
 
 """
 Step 5: Solve model

@@ -19,8 +19,7 @@ season = 'summer'
 filename = f'../input/AssB_Input_Group{group}_{season}.csv'
 data = pd.read_csv(
     filename, parse_dates=True)
-data.columns = ['start', 'end', 'demand',
-                'pv_gen', 'price', 'emission_factor']
+data.columns = ['start', 'end', 'demand', 'pv_gen', 'price', 'emission_factor']
 
 
 """
@@ -109,17 +108,14 @@ model.optimize()
 """
 Step 6: Print variables values for optimal solution
 """
-# Get the values of the decision variables
-output = pd.DataFrame(index=data.index)
-
-output['grid_power'] = model.getAttr('x', grid_power).values()
-output['battery_charge'] = model.getAttr('x', battery_charge).values()
-output['battery_power_in'] = model.getAttr('x', battery_power_in).values()
-output['battery_power_out'] = model.getAttr('x', battery_power_out).values()
+data['grid'] = model.getAttr('x', grid_power).values()
+data['battery_charge'] = model.getAttr('x', battery_charge).values()
+data['battery_in'] = model.getAttr('x', battery_power_in).values()
+data['battery_out'] = model.getAttr('x', battery_power_out).values()
 
 
 """
 Step 7: Plot optimal power output from each generator
 """
 # Plot results
-output.grid_power.plot(kind='line')
+data.grid.plot(kind='line')

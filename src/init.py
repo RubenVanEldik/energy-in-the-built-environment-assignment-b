@@ -18,9 +18,8 @@ season = 'summer'
 
 filename = f'../input/AssB_Input_Group{group}_{season}.csv'
 input_file = pd.read_csv(
-    filename, index_col='Start date/time', parse_dates=True)
-input_file.columns = ['end', 'demand', 'pv_gen', 'price', 'emission_factor']
-input_file.index.names = ['start']
+    filename, parse_dates=True)
+input_file.columns = ['start', 'end', 'demand', 'pv_gen', 'price', 'emission_factor']
 
 
 """
@@ -64,11 +63,13 @@ grid_power = model.addVars(
 
 # including SoC constraints
 battery_charge = model.addVars(
-    input_file.index, name="battery_charge", lb=SoC_min * C_bat, ub=SoC_max * C_bat)
+    input_file.index, name="battery_charge", lb=SoC_min * C_bat, ub=SoC_max * 
+    C_bat)
 
-battery_power = model.addVars(
-    input_file.index, name="battery_power", lb=-Pbatmax, ub=Pbatmax)
-
+battery_power_in = model.addVars(
+    input_file.index, name="battery_power_in", lb=0, ub=Pbatmax)
+battery_power_out = model.addVars(
+    input_file.index, name="battery_power_out", lb=0, ub=Pbatmax)
 
 """
 Step 3: Add constraints
@@ -78,16 +79,17 @@ Step 3: Add constraints
 # Power boundaries
 # Power balance formula
 model.addConstrs(grid_power[t] == input_file.demand[t] - input_file.pv_gen[t]
-                 - battery_power[t] for t in range(T))
+                 - battery_power_out[t] + battery_power_in[t] for t in range(T)
+                 )
 
 # Battery SoC dynamics constraint
-model.addConstrs(
-    battery_power[t] == 
-    (-(battery_charge[t]-battery_charge[t-1])/(Delta_t*eff_ch) 
-     if (battery_charge[t]-battery_charge[t-1]) >= 0 
-     else -((battery_charge[t]-battery_charge[t-1])*eff_dis)/(Delta_t)) 
-    for t in range(T)
-    )
+model.addConstrs(battery_power_in[t] == 
+                 (battery_charge[t]-battery_charge[t-1])/
+                 (Delta_t*eff_ch) for t in range(T))
+model.addConstrs(battery_power_out[t] == 
+                 ((battery_charge[t]-battery_charge[t-1])*eff_dis)/
+                 (Delta_t) for t in range(T)
+                 )
 
 """
 Step 4: Set objective function

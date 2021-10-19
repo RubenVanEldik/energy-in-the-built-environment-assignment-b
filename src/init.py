@@ -91,24 +91,26 @@ Step 5: Solve model
 """
 model.setObjective(obj, gp.GRB.MINIMIZE)
 model.optimize()
+assert model.status == gp.GRB.OPTIMAL, 'The model could not be resolved'
 
-if model.status == gp.GRB.OPTIMAL:
-    """
-    Step 6: Print variables values for optimal solution
-    """
-    data['grid'] = model.getAttr('x', P_grid).values()
-    data['battery_charge'] = model.getAttr('x', SoC).values()
-    data['battery_in'] = model.getAttr('x', P_bat_in).values()
-    data['battery_out'] = model.getAttr('x', P_bat_out).values()
 
-    """
-    Step 7: Plot optimal power output from each generator
-    """
-    # Plot results
-    plot = data.grid.plot(kind='line')
-    # data.battery_charge.plot(kind='line')
-    data.battery_in.plot(kind='line')
-    data.pv_gen.plot(kind='line')
-    data.battery_out.plot(kind='line')
-    data.demand.plot(kind='line')
-    plot.legend()
+"""
+Step 6: Print variables values for optimal solution
+"""
+data['grid'] = model.getAttr('x', P_grid).values()
+data['battery_charge'] = model.getAttr('x', SoC).values()
+data['battery_in'] = model.getAttr('x', P_bat_in).values()
+data['battery_out'] = model.getAttr('x', P_bat_out).values()
+
+
+"""
+Step 7: Plot optimal power output from each generator
+"""
+# Plot results
+plot = data.grid.plot(kind='line')
+# data.battery_charge.plot(kind='line')
+data.battery_in.plot(kind='line')
+data.pv_gen.plot(kind='line')
+data.battery_out.plot(kind='line')
+data.demand.plot(kind='line')
+plot.legend()

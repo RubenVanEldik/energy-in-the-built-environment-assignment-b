@@ -27,7 +27,7 @@ Parameters value
 """
 # Time-step
 Delta_t = 0.25  # 15 minute (0.25 hour) intervals
-T = 24*3*1/Delta_t  # number of time-slots (in three days)
+T = int(24*3*1/Delta_t)  # number of time-slots (in three days)
 
 # Limits on grid and max, min, and initial SOC
 Pgridmax = 3.0  # [kW]
@@ -85,12 +85,13 @@ model.addConstrs(grid_power[t] == input_file.demand[t] - input_file.pv_gen[t]
 # Battery SoC dynamics constraint
 model.addConstrs(battery_power_in[t] == 
                  (battery_charge[t]-battery_charge[t-1])/
-                 (Delta_t*eff_ch) for t in range(T))
+                 (Delta_t*eff_ch) for t in range(1,T))
 model.addConstrs(battery_power_out[t] == 
                  ((battery_charge[t]-battery_charge[t-1])*eff_dis)/
-                 (Delta_t) for t in range(T)
+                 (Delta_t) for t in range(1,T)
                  )
-
+model.addConstr(battery_power_in[0] == (battery_charge[0]-SoC0*C_bat)/(Delta_t*eff_ch))
+model.addConstr(battery_power_out[0] == (battery_charge[0]-SoC0*C_bat*eff_dis)/(Delta_t))
 """
 Step 4: Set objective function
 """

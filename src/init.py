@@ -31,8 +31,8 @@ Delta_t = 0.25  # 15 minute (0.25 hour) intervals
 T = 24*3*1/Delta_t  # number of time-slots (in three days)
 
 # Limits on grid and max, min, and initial SOC
-Pgridmax = 3  # [kW]
-Pbatmax = 4  # [kW]
+Pgridmax = 3.0  # [kW]
+Pbatmax = 4.0  # [kW]
 
 SoC_min = 0.2  # [-] (battery min state of charge)
 SoC_max = 1  # [-] (battery max state of charge)
@@ -61,6 +61,7 @@ Step 2: Define variables
 
 grid_power = model.addVars(input_file.index, name="grid_power")
 
+# including SoC constraints
 battery_charge = model.addVars(
     input_file.index, name="battery_charge", lb=SoC_min * C_bat, ub=SoC_max * C_bat)
 
@@ -70,37 +71,40 @@ battery_power = model.addVars(input_file.index, name="battery_power")
 """
 Step 3: Add constraints
 """
-
 # Nonnegative variables
 
+# Power boundaries
+model.addConstrs((grid_power[t]) <= Pgridmax for t in input_file.index)
+model.addConstrs(gp.abs_(battery_power[t]) <= Pbatmax for t in range(T))
 
 # Power balance formula
-
+model.addConstrs(grid_power[t] == input_file.demand[t] - input_file.pv_gen[t] 
+                 - battery_power[t] for t in range(T))
 
 # Battery SoC dynamics constraint
-
-
-# SoC constraints
-
-
-# Power boundaries
-
+model.addConstrs(
+    battery_power[t] == 
+    (-(battery_charge[t]-battery_charge[t-1])/(Delta_t*eff_ch) 
+     if (battery_charge[t]-battery_charge[t-1]) >= 0 
+     else -((battery_charge[t]-battery_charge[t-1])*eff_dis)/(Delta_t)) 
+    for t in range(T)
+    )
 
 """
 Step 4: Set objective function
 """
-
+obj = gp.quicksum(input_file.price[t]*grid_power[t]*Delta_t for t in range(T))
 
 """
 Step 5: Solve model
 """
-
+model.setObjective(obj, gp.GRB.MINIMIZE)
+model.optimize()
 
 """
 Step 6: Print variables values for optimal solution
 """
 # Get the values of the decision variables
-
 
 """
 Step 7: Plot optimal power output from each generator 

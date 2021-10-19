@@ -87,13 +87,13 @@ model.addConstrs(battery_power_in[t] ==
                  (battery_charge[t]-battery_charge[t-1]) /
                  (Delta_t*eff_ch) for t in range(1, T))
 model.addConstrs(battery_power_out[t] ==
-                 ((battery_charge[t]-battery_charge[t-1])*eff_dis) /
+                 ((battery_charge[t-1]-battery_charge[t])*eff_dis) /
                  (Delta_t) for t in range(1, T))
 
 model.addConstr(battery_power_in[0] == (
     battery_charge[0]-SoC0*C_bat)/(Delta_t*eff_ch))
 model.addConstr(battery_power_out[0] == (
-    battery_charge[0]-SoC0*C_bat*eff_dis)/(Delta_t))
+    (SoC0*C_bat-battery_charge[0])*eff_dis)/(Delta_t))
 """
 Step 4: Set objective function
 """

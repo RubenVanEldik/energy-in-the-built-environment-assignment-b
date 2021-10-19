@@ -43,7 +43,7 @@ eff_dis = 0.94  # battery discharging efficiency
 eff_ch = 0.94  # battery charging efficiency
 
 # Plot power demand and PV generation data
-f1 = plt.figure(1)
+# f1 = plt.figure(1)
 
 
 """
@@ -66,10 +66,12 @@ battery_charge = model.addVars(
     data.index, name="battery_charge", lb=SoC_min * C_bat, ub=SoC_max *
     C_bat)
 
+battery_is_charging = model.addVars(
+    data.index, name='battery_is_charging', vtype=gp.GRB.BINARY)
 battery_power_in = model.addVars(
-    data.index, name="battery_power_in", lb=0, ub=Pbatmax)
+    data.index, name="battery_power_in", ub=Pbatmax)
 battery_power_out = model.addVars(
-    data.index, name="battery_power_out", lb=0, ub=Pbatmax)
+    data.index, name="battery_power_out", ub=Pbatmax)
 
 """
 Step 3: Add constraints
@@ -83,17 +85,18 @@ model.addConstrs(grid_power[t] == data.demand[t]
                  + battery_power_in[t] for t in range(T))
 
 # Battery SoC dynamics constraint
-model.addConstrs(battery_power_in[t] ==
-                 (battery_charge[t]-battery_charge[t-1]) /
-                 (Delta_t*eff_ch) for t in range(1, T))
-model.addConstrs(battery_power_out[t] ==
-                 ((battery_charge[t-1]-battery_charge[t])*eff_dis) /
-                 (Delta_t) for t in range(1, T))
+model.addConstrs(battery_power_in[t] == (battery_is_charging[t] *
+                 ((battery_charge[t]-battery_charge[t-1]) /
+                 (Delta_t*eff_ch))) for t in range(1, T))
+model.addConstrs(battery_power_out[t] == ((1 - battery_is_charging[t]) *
+                 (((battery_charge[t-1]-battery_charge[t])*eff_dis) /
+                 (Delta_t))) for t in range(1, T))
 
 model.addConstr(battery_power_in[0] == (
     battery_charge[0]-SoC0*C_bat)/(Delta_t*eff_ch))
 model.addConstr(battery_power_out[0] == (
-    (SoC0*C_bat-battery_charge[0])*eff_dis)/(Delta_t))
+    (SoC0*C_bat-battery_charge[0])*eff_dis)/Delta_t)
+
 """
 Step 4: Set objective function
 """
@@ -105,17 +108,23 @@ Step 5: Solve model
 model.setObjective(obj, gp.GRB.MINIMIZE)
 model.optimize()
 
-"""
-Step 6: Print variables values for optimal solution
-"""
-data['grid'] = model.getAttr('x', grid_power).values()
-data['battery_charge'] = model.getAttr('x', battery_charge).values()
-data['battery_in'] = model.getAttr('x', battery_power_in).values()
-data['battery_out'] = model.getAttr('x', battery_power_out).values()
+if model.status == gp.GRB.OPTIMAL:
+    """
+    Step 6: Print variables values for optimal solution
+    """
+    data['grid'] = model.getAttr('x', grid_power).values()
+    data['battery_charge'] = model.getAttr('x', battery_charge).values()
+    data['battery_in'] = model.getAttr('x', battery_power_in).values()
+    data['battery_out'] = model.getAttr('x', battery_power_out).values()
 
-
-"""
-Step 7: Plot optimal power output from each generator
-"""
-# Plot results
-data.grid.plot(kind='line')
+    """
+    Step 7: Plot optimal power output from each generator
+    """
+    # Plot results
+    plot = data.grid.plot(kind='line')
+    # data.battery_charge.plot(kind='line')
+    data.battery_in.plot(kind='line')
+    data.pv_gen.plot(kind='line')
+    data.battery_out.plot(kind='line')
+    data.demand.plot(kind='line')
+    plot.legend()

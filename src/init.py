@@ -19,7 +19,8 @@ season = 'summer'
 filename = f'../input/AssB_Input_Group{group}_{season}.csv'
 input_file = pd.read_csv(
     filename, parse_dates=True)
-input_file.columns = ['start', 'end', 'demand', 'pv_gen', 'price', 'emission_factor']
+input_file.columns = ['start', 'end', 'demand',
+                      'pv_gen', 'price', 'emission_factor']
 
 
 """
@@ -63,7 +64,7 @@ grid_power = model.addVars(
 
 # including SoC constraints
 battery_charge = model.addVars(
-    input_file.index, name="battery_charge", lb=SoC_min * C_bat, ub=SoC_max * 
+    input_file.index, name="battery_charge", lb=SoC_min * C_bat, ub=SoC_max *
     C_bat)
 
 battery_power_in = model.addVars(
@@ -78,20 +79,22 @@ Step 3: Add constraints
 
 # Power boundaries
 # Power balance formula
-model.addConstrs(grid_power[t] == input_file.demand[t] - input_file.pv_gen[t]
-                 - battery_power_out[t] + battery_power_in[t] for t in range(T)
-                 )
+model.addConstrs(grid_power[t] == input_file.demand[t]
+                 - input_file.pv_gen[t] - battery_power_out[t]
+                 + battery_power_in[t] for t in range(T))
 
 # Battery SoC dynamics constraint
-model.addConstrs(battery_power_in[t] == 
-                 (battery_charge[t]-battery_charge[t-1])/
-                 (Delta_t*eff_ch) for t in range(1,T))
-model.addConstrs(battery_power_out[t] == 
-                 ((battery_charge[t]-battery_charge[t-1])*eff_dis)/
-                 (Delta_t) for t in range(1,T)
-                 )
-model.addConstr(battery_power_in[0] == (battery_charge[0]-SoC0*C_bat)/(Delta_t*eff_ch))
-model.addConstr(battery_power_out[0] == (battery_charge[0]-SoC0*C_bat*eff_dis)/(Delta_t))
+model.addConstrs(battery_power_in[t] ==
+                 (battery_charge[t]-battery_charge[t-1]) /
+                 (Delta_t*eff_ch) for t in range(1, T))
+model.addConstrs(battery_power_out[t] ==
+                 ((battery_charge[t]-battery_charge[t-1])*eff_dis) /
+                 (Delta_t) for t in range(1, T))
+
+model.addConstr(battery_power_in[0] == (
+    battery_charge[0]-SoC0*C_bat)/(Delta_t*eff_ch))
+model.addConstr(battery_power_out[0] == (
+    battery_charge[0]-SoC0*C_bat*eff_dis)/(Delta_t))
 """
 Step 4: Set objective function
 """

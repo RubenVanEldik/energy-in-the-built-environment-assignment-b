@@ -17,10 +17,10 @@ group = 12
 season = 'summer'
 
 filename = f'../input/AssB_Input_Group{group}_{season}.csv'
-input_file = pd.read_csv(
+data = pd.read_csv(
     filename, parse_dates=True)
-input_file.columns = ['start', 'end', 'demand',
-                      'pv_gen', 'price', 'emission_factor']
+data.columns = ['start', 'end', 'demand',
+                'pv_gen', 'price', 'emission_factor']
 
 
 """
@@ -60,17 +60,17 @@ Step 2: Define variables
 
 
 grid_power = model.addVars(
-    input_file.index, name="grid_power", lb=-Pgridmax, ub=Pgridmax)
+    data.index, name="grid_power", lb=-Pgridmax, ub=Pgridmax)
 
 # including SoC constraints
 battery_charge = model.addVars(
-    input_file.index, name="battery_charge", lb=SoC_min * C_bat, ub=SoC_max *
+    data.index, name="battery_charge", lb=SoC_min * C_bat, ub=SoC_max *
     C_bat)
 
 battery_power_in = model.addVars(
-    input_file.index, name="battery_power_in", lb=0, ub=Pbatmax)
+    data.index, name="battery_power_in", lb=0, ub=Pbatmax)
 battery_power_out = model.addVars(
-    input_file.index, name="battery_power_out", lb=0, ub=Pbatmax)
+    data.index, name="battery_power_out", lb=0, ub=Pbatmax)
 
 """
 Step 3: Add constraints
@@ -79,8 +79,8 @@ Step 3: Add constraints
 
 # Power boundaries
 # Power balance formula
-model.addConstrs(grid_power[t] == input_file.demand[t]
-                 - input_file.pv_gen[t] - battery_power_out[t]
+model.addConstrs(grid_power[t] == data.demand[t]
+                 - data.pv_gen[t] - battery_power_out[t]
                  + battery_power_in[t] for t in range(T))
 
 # Battery SoC dynamics constraint
@@ -98,7 +98,7 @@ model.addConstr(battery_power_out[0] == (
 """
 Step 4: Set objective function
 """
-obj = gp.quicksum(input_file.price[t]*grid_power[t]*Delta_t for t in range(T))
+obj = gp.quicksum(data.price[t]*grid_power[t]*Delta_t for t in range(T))
 
 """
 Step 5: Solve model
@@ -110,7 +110,7 @@ model.optimize()
 Step 6: Print variables values for optimal solution
 """
 # Get the values of the decision variables
-output = pd.DataFrame(index=input_file.index)
+output = pd.DataFrame(index=data.index)
 
 output['grid_power'] = model.getAttr('x', grid_power).values()
 output['battery_charge'] = model.getAttr('x', battery_charge).values()

@@ -110,9 +110,16 @@ model.optimize()
 Step 6: Print variables values for optimal solution
 """
 # Get the values of the decision variables
+output = pd.DataFrame(index=input_file.index)
+
+output['grid_power'] = model.getAttr('x', grid_power).values()
+output['battery_charge'] = model.getAttr('x', battery_charge).values()
+output['battery_power_in'] = model.getAttr('x', battery_power_in).values()
+output['battery_power_out'] = model.getAttr('x', battery_power_out).values()
+
 
 """
-Step 7: Plot optimal power output from each generator 
+Step 7: Plot optimal power output from each generator
 """
 # Plot results
-f2 = plt.figure(2)
+output.grid_power.plot(kind='line')

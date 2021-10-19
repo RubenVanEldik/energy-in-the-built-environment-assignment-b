@@ -77,5 +77,8 @@ def run(data):
     data['battery_charge'] = model.getAttr('x', SoC).values()
     data['battery_in'] = model.getAttr('x', P_bat_in).values()
     data['battery_out'] = model.getAttr('x', P_bat_out).values()
+    data['battery_power'] = data['battery_in'] - data['battery_out']
+    del data['battery_in']
+    del data['battery_out']
 
     return data

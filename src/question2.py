@@ -22,6 +22,10 @@ def optimum_perseason(season):
     # Run the model
     results = mf.run(data)
     
+    cost = (results.grid * results.price * 0.25).sum()
+    print('Optimised cost for {} season is {}'.format(
+            season, cost))
+    
     # Plot the results input data
     data = data[['demand', 'pv_gen']]
     filename = f'demand_and_pv_{season}_{group}.png'

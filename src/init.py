@@ -1,6 +1,6 @@
 import pandas as pd  # for csv reading
 import matplotlib.pyplot as plt
-import model
+import model_function as mf
 import plots
 
 
@@ -24,7 +24,7 @@ data = pd.read_csv(filename, parse_dates=True)
 data.columns = ['start', 'end', 'demand', 'pv_gen', 'price', 'emission_factor']
 
 # Run the model
-results = model.run(data)
+results = mf.run(data)
 
 # Plot the results input data
 data = data[['demand', 'pv_gen']]

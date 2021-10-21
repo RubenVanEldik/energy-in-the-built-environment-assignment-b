@@ -42,7 +42,7 @@ results = mf.run(data, "cost")
 maximum_emissions = (results.grid * results.emission_factor * 0.25).sum()
 
 #doing bins stuff
-emission_range_step = (maximum_emissions - minimal_emissions)/10
+emission_range_step = (maximum_emissions - minimal_emissions)/1000
 
 emission_constraint = np.arange(minimal_emissions, maximum_emissions + emission_range_step, emission_range_step)
 
@@ -55,7 +55,7 @@ for emission_step in emission_constraint:
     emission = (results.grid * results.emission_factor * 0.25).sum()
     pareto_dataframe.loc[emission_step] = [cost, emission]
 
-pareto_dataframe.plot(kind = "scatter", x="emission", y="cost")
+pareto_dataframe.plot(kind = "scatter", x="emission", y="cost", s=0.03)
 
 # Plot the results input data
 

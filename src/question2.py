@@ -10,11 +10,19 @@ plt.rcParams['font.family'] = 'serif'
 group = 12
 seasons = ['Summer', 'Winter']
 
-# Create two figures
+# Create a figure
 xlabel = 'Time [hour]'
 ylabel = 'Power [kW]'
 figure, axes = plots.create_plot_with_subplots(
     2, 1, xlabel=xlabel, ylabel=ylabel)
+
+
+def initiate_subplot(axes, index, season):
+    subplot = axes[index]
+    subplot.title.set_text(season)
+    labels = ['0:00', '12:00', '0:00', '12:00', '0:00', '12:00', '00:00']
+    plt.xticks(np.arange(289, step=48), labels)
+    return subplot
 
 
 # Create a subplot for the demand and PV for each season
@@ -26,8 +34,7 @@ for index, season in enumerate(seasons):
     print('Optimised cost for {} season is {}'.format(season, cost))
 
     # Create the subplot
-    subplot = axes[index]
-    subplot.title.set_text(season)
+    subplot = initiate_subplot(axes, index, season)
     subplot.plot(results.demand, color='#aa3026')
     subplot.plot(results.pv_gen, color='#91723c')
 
@@ -44,9 +51,7 @@ for index, season in enumerate(seasons):
     print('Optimised cost for {} season is {}'.format(season, cost))
 
     # Create the subplot
-    subplot = axes[index]
-    subplot.title.set_text(season)
-    subplot.plot(results.demand, color='#aa3026')
+    subplot = initiate_subplot(axes, index, season)
     subplot.plot(results.pv_gen, color='#91723c')
     subplot.plot(results.grid, color='#85ab7b')
     subplot.plot(results.battery_power, color='#915a8d')

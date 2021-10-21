@@ -53,7 +53,7 @@ def season_changer(group, season, no_bins):
 group = 12
 seasons = ['Summer', 'Winter']
 figure, axes = plots.create_plot_with_subplots(2, 1,
-                                               xlabel='Emissions [$kg CO_2$]',
+                                               xlabel='Emissions [$kg\:CO_2$]',
                                                ylabel='Costs [$€$]',
                                                sharex=False, sharey=False)
 

@@ -1,7 +1,7 @@
 import gurobipy as gp
 
 
-def run(data):
+def run(data, optimisation_target="cost"):
     data = data.copy()
     """
     Parameters value
@@ -23,6 +23,9 @@ def run(data):
     C_bat = 13.5
     eff_dis = 0.94  # battery discharging efficiency
     eff_ch = 0.94  # battery charging efficiency
+    
+    #emissions calculation from emission factor
+    
 
     """
     Step 1: Create a model
@@ -37,6 +40,7 @@ def run(data):
     SoC = model.addVars(data.index, lb=SoC_min * C_bat, ub=SoC_max * C_bat)
     P_bat_in = model.addVars(data.index, ub=P_bat_max)
     P_bat_out = model.addVars(data.index, ub=P_bat_max)
+    
 
     """
     Step 3: Add constraints
@@ -57,16 +61,26 @@ def run(data):
         SoC[0] - SoC0 * C_bat) / (Delta_t * eff_ch))
     model.addConstr(P_bat_out[0] == (
         (SoC0 * C_bat - SoC[0]) * eff_dis) / Delta_t)
+    
+    
 
     """
     Step 4: Set objective function
     """
-    obj = gp.quicksum(data.price[t]*P_grid[t]*Delta_t for t in range(T))
+    obj_cost = gp.quicksum(data.price[t] * P_grid[t] * Delta_t for t in range(T))
+    
+    obj_emission = gp.quicksum(data.emission_factor[t] * P_grid[t] * Delta_t for t in range(T))
 
     """
     Step 5: Solve model
     """
-    model.setObjective(obj, gp.GRB.MINIMIZE)
+    if optimisation_target == "cost":
+        model.setObjective(obj_cost, gp.GRB.MINIMIZE)
+    else:
+        model.setObjective(obj_emission, gp.GRB.MINIMIZE)
+    
+    
+    
     model.optimize()
     assert model.status == gp.GRB.OPTIMAL, 'The model could not be resolved'
 

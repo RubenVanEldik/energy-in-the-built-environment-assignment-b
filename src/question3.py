@@ -19,7 +19,7 @@ def plot_data(data, filename, labels):
     plots.savefig(f'../output/{filename}')
 
 
-def season_changer(group, season):
+def season_changer(group, season, no_bins):
     # Run the model for cost optimization
     cost_results = mf.run(group, season, 'emissions')
     min_emissions = (cost_results.grid *
@@ -30,7 +30,6 @@ def season_changer(group, season):
     max_emissions = (em_results.grid * em_results.emission_factor * 0.25).sum()
 
     # Calculate the bins for the Pareto frontier
-    no_bins = 10
     bin_width = (max_emissions - min_emissions) / (no_bins - 1)
     emissions_bins = np.arange(
         min_emissions, max_emissions + bin_width, bin_width)
@@ -47,10 +46,28 @@ def season_changer(group, season):
         pareto_dataframe.loc[max_emissions] = [cost, emission]
 
     print('\r Succesfully created the Pareto frontier')
-    pareto_dataframe.plot(kind='scatter', x='emissions', y='cost')
+    return pareto_dataframe
 
 
+# Set the group and seasons and create a figure with two vertical plots
 group = 12
-seasons = ["summer", "winter"]
-for season in seasons:
-    season_changer(group, season)
+seasons = ['Summer', 'Winter']
+figure, axes = plots.create_plot_with_subplots(2, 1,
+                                               xlabel='Emissions [$kg CO_2$]',
+                                               ylabel='Costs [$€$]',
+                                               sharex=False, sharey=False)
+
+# Create a subplot for each season
+for index, season in enumerate(seasons):
+    # Create the Pareto frontier for both the line and scatter plot
+    low_res = season_changer(group, season.lower(), 10)
+    high_res = season_changer(group, season.lower(), 100)
+
+    # Create the subplot
+    subplot = axes[index]
+    subplot.title.set_text(season)
+    subplot.plot(high_res.cost, color='#aa3026', linewidth=0.8)
+    subplot.scatter(x=low_res.emissions, y=low_res.cost, color='#aa3026')
+
+# Save the figure
+plots.savefig('../output/pareto_frontier.png')

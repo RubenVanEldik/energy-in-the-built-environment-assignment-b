@@ -19,19 +19,14 @@ def plot_data(data, filename, labels):
     plots.savefig(f'../output/{filename}')
 
 
-def season_changer(season):
-    filename = f'../input/AssB_Input_Group{group}_{season}.csv'
-    data = pd.read_csv(filename, parse_dates=True)
-    data.columns = ['start', 'end', 'demand',
-                    'pv_gen', 'price', 'emission_factor']
-
+def season_changer(group, season):
     # Run the model for cost optimization
-    cost_results = mf.run(data, 'emissions')
+    cost_results = mf.run(group, season, 'emissions')
     min_emissions = (cost_results.grid *
                      cost_results.emission_factor * 0.25).sum()
 
     # Run the model for emissions optimization
-    em_results = mf.run(data, 'cost')
+    em_results = mf.run(group, season, 'cost')
     max_emissions = (em_results.grid * em_results.emission_factor * 0.25).sum()
 
     # Calculate the bins for the Pareto frontier
@@ -46,7 +41,7 @@ def season_changer(season):
     for index, max_emissions in enumerate(emissions_bins):
         print('\rRunning optimization {} of {}'.format(
             index + 1, len(emissions_bins)), end='')
-        results = mf.run(data, 'cost', max_emissions)
+        results = mf.run(group, season, 'cost', max_emissions)
         cost = (results.grid * results.price * 0.25).sum()
         emission = (results.grid * results.emission_factor * 0.25).sum()
         pareto_dataframe.loc[max_emissions] = [cost, emission]
@@ -58,4 +53,4 @@ def season_changer(season):
 group = 12
 seasons = ["summer", "winter"]
 for season in seasons:
-    season_changer(season)
+    season_changer(group, season)

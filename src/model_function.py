@@ -1,8 +1,14 @@
+import pandas as pd
 import gurobipy as gp
 
 
-def run(data, optimisation_target="cost", max_emission=None):
-    data = data.copy()
+def run(group, season, optimisation_target="cost", max_emission=None):
+    # Import the data
+    filename = f'../input/AssB_Input_Group{group}_{season}.csv'
+    data = pd.read_csv(filename, parse_dates=True)
+    data.columns = ['start', 'end', 'demand',
+                    'pv_gen', 'price', 'emission_factor']
+
     """
     Parameters value
     """

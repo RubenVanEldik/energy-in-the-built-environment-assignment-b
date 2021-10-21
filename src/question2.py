@@ -17,7 +17,25 @@ figure, axes = plots.create_plot_with_subplots(
     2, 1, xlabel=xlabel, ylabel=ylabel)
 
 
-# Create a subplot for each season
+# Create a subplot for the demand and PV for each season
+for index, season in enumerate(seasons):
+    # Create the Pareto frontier for both the line and scatter plot
+    results = mf.run(group, season, 'emissions')
+
+    cost = (results.grid * results.price * 0.25).sum()
+    print('Optimised cost for {} season is {}'.format(season, cost))
+
+    # Create the subplot
+    subplot = axes[index]
+    subplot.title.set_text(season)
+    subplot.plot(results.demand, color='#aa3026')
+    subplot.plot(results.pv_gen, color='#91723c')
+
+# Save the figure
+plots.savefig('../output/demand_and_pv.png')
+
+
+# Create a subplot for all power flows for each season
 for index, season in enumerate(seasons):
     # Create the Pareto frontier for both the line and scatter plot
     results = mf.run(group, season, 'emissions')

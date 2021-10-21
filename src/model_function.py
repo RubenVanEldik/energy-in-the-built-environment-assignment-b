@@ -55,11 +55,6 @@ def run(data, optimisation_target="cost", max_emission=None):
     model.addConstr(SoC[0] == SoC0 * C_bat + (P_bat_in[0] * Delta_t * eff_ch)
                     - (P_bat_out[0] * Delta_t) / eff_dis)
 
-    model.addConstr(P_bat_in[0] == (
-        SoC[0] - SoC0 * C_bat) / (Delta_t * eff_ch))
-    model.addConstr(P_bat_out[0] == (
-        (SoC0 * C_bat - SoC[0]) * eff_dis) / Delta_t)
-
     # emission cap
     if max_emission is not None:
         model.addConstr(gp.quicksum(

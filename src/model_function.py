@@ -1,7 +1,7 @@
 import gurobipy as gp
 
 
-def run(data, optimisation_target="cost"):
+def run(data, optimisation_target="cost", max_emission=None):
     data = data.copy()
     """
     Parameters value
@@ -62,6 +62,9 @@ def run(data, optimisation_target="cost"):
     model.addConstr(P_bat_out[0] == (
         (SoC0 * C_bat - SoC[0]) * eff_dis) / Delta_t)
     
+    #emission cap
+    if max_emission != None:
+        model.addConstr(gp.quicksum(data.emission_factor[t] * P_grid[t] * Delta_t for t in range(T)) <= max_emission)
     
 
     """
@@ -78,6 +81,7 @@ def run(data, optimisation_target="cost"):
         model.setObjective(obj_cost, gp.GRB.MINIMIZE)
     else:
         model.setObjective(obj_emission, gp.GRB.MINIMIZE)
+
     
     
     
@@ -96,3 +100,5 @@ def run(data, optimisation_target="cost"):
     del data['battery_out']
 
     return data
+
+    

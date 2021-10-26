@@ -41,8 +41,11 @@ for index, season in enumerate(seasons):
 figure, axes = initiate_figure()
 for index, season in enumerate(results):
     subplot = initiate_subplot(axes, index, season)
-    subplot.plot(results[season].demand, color='#aa3026')
-    subplot.plot(results[season].pv_gen, color='#91723c')
+    subplot.plot(results[season].demand, color='#aa3026', label='Demand')
+    subplot.plot(results[season].pv_gen, color='#91723c', label='PV')
+
+    if index == 0:
+        subplot.legend()
 plots.savefig('../output/demand_and_pv.png')
 
 # Create a plot with the price and state of charge
@@ -52,15 +55,26 @@ for index, season in enumerate(results):
     subplot2 = subplot.twinx()
     subplot2.set_ylabel('Electricity price [€/kWh]')
 
-    subplot.plot(results[season].battery_charge, color='#aa3026')
-    subplot2.plot(results[season].price, color='#91723c')
+    plot1 = subplot.plot(results[season].battery_charge,
+                         color='#aa3026', label='State of charge')
+    plot2 = subplot2.plot(results[season].price, color='#91723c',
+                          label='Electricity price')
+
+    if index == 0:
+        allplots = plot1 + plot2
+        labels = [plot.get_label() for plot in allplots]
+        subplot.legend(allplots, labels, loc=0)
 plots.savefig('../output/price_vs_battery.png')
 
 # Create a plot with all power flows
 figure, axes = initiate_figure()
 for index, season in enumerate(results):
     subplot = initiate_subplot(axes, index, season)
-    subplot.plot(results[season].pv_gen, color='#91723c')
-    subplot.plot(results[season].grid, color='#85ab7b')
-    subplot.plot(results[season].battery_power, color='#915a8d')
+    subplot.plot(results[season].demand, color='#aa3026', label='Demand')
+    subplot.plot(results[season].pv_gen, color='#91723c', label='PV')
+    subplot.plot(results[season].grid, color='#85ab7b', label='Grid')
+    subplot.plot(results[season].battery_power,
+                 color='#915a8d', label='Battery')
+    if index == 0:
+        subplot.legend()
 plots.savefig('../output/power_flows.png')

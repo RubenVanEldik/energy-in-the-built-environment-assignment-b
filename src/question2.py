@@ -49,14 +49,14 @@ for index, season in enumerate(results):
 plots.savefig('../output/demand_and_pv.png')
 
 # Create a plot with the price and state of charge
-figure, axes = initiate_figure(ylabel='State of Charge [kWh]')
+figure, axes = initiate_figure(ylabel='Battery power [kW]')
 for index, season in enumerate(results):
     subplot = initiate_subplot(axes, index, season)
     subplot2 = subplot.twinx()
     subplot2.set_ylabel('Electricity price [€/kWh]')
 
-    plot1 = subplot.plot(results[season].battery_charge,
-                         color='#aa3026', label='State of charge')
+    plot1 = subplot.plot(results[season].battery_power,
+                         color='#aa3026', label='Battery power')
     plot2 = subplot2.plot(results[season].price, color='#91723c',
                           label='Electricity price')
 

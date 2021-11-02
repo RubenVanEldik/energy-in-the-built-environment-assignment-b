@@ -16,9 +16,10 @@ def create_plot_with_subplots(rows, columns, *, xlabel, ylabel, sharex=True, sha
         axes: Created axes
     """
     # Create a figure with subplots and set the correct spacing
-    width = 6.5 * columns ** (1 / 3)
+    width = 8 * columns ** (1 / 3)
     height = 5 * rows ** (1 / 3)
-    figure, axes = plt.subplots(nrows=rows, ncols=columns, sharex=sharex, sharey=sharey, figsize=(width, height))
+    figure, axes = plt.subplots(
+        nrows=rows, ncols=columns, sharex=sharex, sharey=sharey, figsize=(width, height))
     figure.subplots_adjust(wspace=0.05, hspace=0.15 * rows)
 
     # Set the labels on the outer x and y axis

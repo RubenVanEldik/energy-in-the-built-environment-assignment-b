@@ -30,7 +30,7 @@ seasons = ['Summer', 'Winter']
 results = {}
 for index, season in enumerate(seasons):
     # Create the Pareto frontier for both the line and scatter plot
-    result = mf.run(group, season, 'emissions')
+    result = mf.run(group, season)
 
     cost = (result.grid * result.price * 0.25).sum()
     print('Optimised cost for {} is €{:.2f}'.format(season.lower(), cost))

@@ -30,17 +30,13 @@ def season_changer(group, season, no_bins):
     em_results = mf.run(group, season, 'cost')
     max_emissions = (em_results.grid * em_results.emission_factor * 0.25).sum()
 
-    # Calculate the bins for the Pareto frontier
-    bin_width = (max_emissions - min_emissions) / (no_bins - 1)
-    emissions_bins = np.arange(
-        min_emissions, max_emissions + bin_width, bin_width)
-
     # Create the Pareto frontier
     pareto_dataframe = pd.DataFrame(columns=['cost', 'emissions'])
+    bins = np.linspace(min_emissions, max_emissions, num=no_bins)
 
-    for index, max_emissions in enumerate(emissions_bins):
+    for index, max_emissions in enumerate(bins):
         print('\rRunning optimization {} of {}'.format(
-            index + 1, len(emissions_bins)), end='')
+            index + 1, no_bins), end='')
         results = mf.run(group, season, 'cost', max_emissions)
         cost = (results.grid * results.price * 0.25).sum()
         emission = (results.grid * results.emission_factor * 0.25).sum()

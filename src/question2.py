@@ -71,11 +71,9 @@ plots.savefig('../output/price_vs_battery.png')
 figure, axes = initiate_figure()
 for index, season in enumerate(results):
     subplot = initiate_subplot(axes, index, season)
-    subplot.plot(results[season].demand, color='#aa3026', label='Demand')
-    subplot.plot(results[season].pv_gen, color='#91723c', label='PV')
-    subplot.plot(results[season].grid, color='#85ab7b', label='Grid')
+    subplot.plot(results[season].grid, color='#aa3026', label='Grid')
     subplot.plot(results[season].battery_power,
-                 color='#915a8d', label='Battery')
+                 color='#91723c', label='Battery')
     if index == 0:
         subplot.legend(bbox_to_anchor=(1, 1), loc='upper left')
 plots.savefig('../output/power_flows.png')

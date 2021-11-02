@@ -61,6 +61,6 @@ for index, season in enumerate(seasons):
     plt.scatter(x=low_res.emissions, y=low_res.cost, color='#aa3026')
 
 # Save the figure
-plt.xlabel('Emissions [$kg\:CO_2$]')
+plt.xlabel('Emissions [$kg\:CO_2 eq$]')
 plt.ylabel('Costs [$€$]')
 plots.savefig('../output/pareto_frontier.png')

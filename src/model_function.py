@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import gurobipy as gp
 
@@ -42,7 +43,7 @@ def run(group, season, optimisation_target="cost", max_emission=None):
     Step 2: Define variables
     """
     P_grid = model.addVars(data.index, lb=-P_grid_max, ub=P_grid_max)
-    SoC = model.addVars(data.index, lb=SoC_min * C_bat, ub=SoC_max * C_bat)
+    SoC = model.addVars(data.index, lb=SoC_min, ub=SoC_max)
     P_bat_in = model.addVars(data.index, ub=P_bat_max)
     P_bat_out = model.addVars(data.index, ub=P_bat_max)
 
@@ -55,11 +56,11 @@ def run(group, season, optimisation_target="cost", max_emission=None):
                      P_bat_out[t] + P_bat_in[t] for t in range(T))
 
     # Battery SoC dynamics constraint
-    model.addConstrs(SoC[t] == SoC[t - 1] + (P_bat_in[t] * Delta_t * eff_ch)
-                     - (P_bat_out[t] * Delta_t) / eff_dis for t in range(1, T))
+    model.addConstrs(SoC[t] == SoC[t - 1] + (P_bat_in[t] * Delta_t * eff_ch / C_bat)
+                     - (P_bat_out[t] * Delta_t / eff_dis / C_bat) for t in range(1, T))
 
-    model.addConstr(SoC[0] == SoC0 * C_bat + (P_bat_in[0] * Delta_t * eff_ch)
-                    - (P_bat_out[0] * Delta_t) / eff_dis)
+    model.addConstr(SoC[0] == SoC0 + (P_bat_in[0] * Delta_t * eff_ch / C_bat)
+                    - (P_bat_out[0] * Delta_t / eff_dis / C_bat))
 
     # emission cap
     if max_emission is not None:

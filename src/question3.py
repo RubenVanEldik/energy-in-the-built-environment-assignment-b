@@ -9,6 +9,7 @@ import pandas as pd  # for csv reading
 import model_function as mf
 import plots
 import numpy as np
+from matplotlib import pyplot as plt
 
 
 def plot_data(data, filename, labels):
@@ -52,10 +53,6 @@ def season_changer(group, season, no_bins):
 # Set the group and seasons and create a figure with two vertical plots
 group = 12
 seasons = ['Summer', 'Winter']
-figure, axes = plots.create_plot_with_subplots(2, 1,
-                                               xlabel='Emissions [$kg\:CO_2$]',
-                                               ylabel='Costs [$€$]',
-                                               sharex=False, sharey=False)
 
 # Create a subplot for each season
 for index, season in enumerate(seasons):
@@ -64,10 +61,10 @@ for index, season in enumerate(seasons):
     high_res = season_changer(group, season.lower(), 100)
 
     # Create the subplot
-    subplot = axes[index]
-    subplot.title.set_text(season)
-    subplot.plot(high_res.cost, color='#aa3026', linewidth=0.8)
-    subplot.scatter(x=low_res.emissions, y=low_res.cost, color='#aa3026')
+    plt.plot(high_res.cost, color='#aa3026', linewidth=0.8)
+    plt.scatter(x=low_res.emissions, y=low_res.cost, color='#aa3026')
 
 # Save the figure
+plt.xlabel('Emissions [$kg\:CO_2$]')
+plt.ylabel('Costs [$€$]')
 plots.savefig('../output/pareto_frontier.png')

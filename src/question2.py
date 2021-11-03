@@ -49,7 +49,7 @@ for index, season in enumerate(results):
 plots.savefig('../output/demand_and_pv.png')
 
 # Create a plot with the price and state of charge
-figure, axes = initiate_figure(ylabel='Battery power [kW]')
+figure, axes = initiate_figure(ylabel='Power [kW]')
 for index, season in enumerate(results):
     subplot = initiate_subplot(axes, index, season)
     subplot2 = subplot.twinx()
@@ -57,23 +57,14 @@ for index, season in enumerate(results):
 
     plot1 = subplot.plot(results[season].battery_power,
                          color='#aa3026', label='Battery power')
-    plot2 = subplot2.plot(results[season].price, color='#91723c',
+    plot2 = subplot.plot(results[season].grid,
+                         color='#91723c', label='Grid power')
+    plot3 = subplot2.plot(results[season].price, color='#85ab7b',
                           label='Electricity price')
 
     if index == 0:
-        allplots = plot1 + plot2
+        allplots = plot1 + plot2 + plot3
         labels = [plot.get_label() for plot in allplots]
         subplot.legend(allplots, labels, bbox_to_anchor=(
             1.12, 1), loc='upper left')
-plots.savefig('../output/price_vs_battery.png')
-
-# Create a plot with all power flows
-figure, axes = initiate_figure()
-for index, season in enumerate(results):
-    subplot = initiate_subplot(axes, index, season)
-    subplot.plot(results[season].grid, color='#aa3026', label='Grid')
-    subplot.plot(results[season].battery_power,
-                 color='#91723c', label='Battery')
-    if index == 0:
-        subplot.legend(bbox_to_anchor=(1, 1), loc='upper left')
-plots.savefig('../output/power_flows.png')
+plots.savefig('../output/price_vs_battery_grid_power.png')
